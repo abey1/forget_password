@@ -1,0 +1,35 @@
+.nav {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2a57fd;
+  padding: 0 1rem;
+  .logo {
+    color: white;
+    font-size: 2rem;
+    font-weight: bolder;
+    cursor: pointer;
+    font-family: "Dancing Script";
+  }
+  .loggedInUser {
+    display: flex;
+    gap: 1rem;
+    .navlink {
+      cursor: pointer;
+
+      .login {
+        text-decoration: none;
+        text-transform: capitalize;
+        color: white;
+        font-family: "Inika";
+      }
+      .signup {
+        text-decoration: none;
+        text-transform: capitalize;
+        color: white;
+        font-family: "Inika";
+      }
+    }
+  }
+}

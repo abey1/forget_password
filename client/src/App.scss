@@ -1,0 +1,9 @@
+.app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  .app_container {
+    width: 1280px;
+  }
+}
