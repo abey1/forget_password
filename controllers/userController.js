@@ -22,7 +22,7 @@ const getMailOptions = ({ to, text }) => {
 };
 
 const createForgetPasswordToken = ({ email, _id, secret }) => {
-  return jwt.sign({ email, _id }, secret, { expiresIn: "5m" });
+  return jwt.sign({ email, _id }, secret, { expiresIn: "1h" });
 };
 
 const createToken = (_id) => {

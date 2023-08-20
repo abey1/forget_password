@@ -41,7 +41,6 @@
         width: 100vw;
         align-items: center;
         justify-content: center;
-        border: 1px red solid;
       }
       .form_container {
         width: 545px;
@@ -105,6 +104,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-top: 2rem;
         width: 253px;
         height: 64px;
         flex-shrink: 0;
@@ -125,45 +125,112 @@
         justify-content: center;
         flex-direction: column;
       }
+      .input_holder {
+      }
+      .icon_holder {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 5rem;
+        height: 67px;
+      }
+      i {
+        font-size: 1.5rem;
+      }
+      .input {
+        width: 482px;
+        height: 67px;
+        flex-shrink: 0;
+        border-radius: 33px;
+        background: #d9d9d9;
+        box-shadow: 0px 4px 11px 0px rgba(0, 0, 0, 0.3);
+        color: #000;
+        font-family: "Inter";
+        font-size: 24px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+        opacity: 0.5;
+        margin-bottom: 1rem;
+        padding-left: 5rem;
+      }
+      #error {
+        font-family: "Inter";
+        color: #d9534f;
+      }
     </style>
   </head>
   <body>
     <div class="main">
       <div class="form_container">
-        <form action="" method="post">
+        <form id="form" action="" method="post" onsubmit="checkPassMatch()">
           <div class="url">makeslifeeasy.shop</div>
           <div class="direction">Please reset your password below :)</div>
           <h1 class="email"><%=email%></h1>
 
-          <div className="input_holder">
-            <div className="icon_holder">
+          <div class="input_holder">
+            <div class="icon_holder">
               <i class="fa-solid fa-lock"></i>
             </div>
             <input
               class="input"
               type="password"
+              id="password"
               name="password"
               id="password"
+              onfocus="makeErrorEmpty()"
               placeholder="password"
             />
           </div>
 
-          <div className="input_holder">
-            <div className="icon_holder">
+          <div class="input_holder">
+            <div class="icon_holder">
               <i class="fa-solid fa-lock"></i>
             </div>
             <input
               class="input"
               type="password"
+              id="confirm-password"
               name="confirm-password"
               id="confirm-password"
+              onfocus="makeErrorEmpty()"
               placeholder="confirm-password"
             />
           </div>
-
+          <div id="error" class="error"></div>
           <input class="send_btn" type="submit" value="submit" />
         </form>
       </div>
     </div>
+    <script>
+      checkPassMatch = () => {
+        event.preventDefault();
+        var password = document.getElementById("password");
+        var confirmPassword = document.getElementById("confirm-password");
+        var form = document.getElementById("form");
+        var error = document.getElementById("error");
+        if (password.value === confirmPassword.value) {
+          if (password.value.length < 8) {
+            error.innerHTML = "Password must be at least 8 characters";
+          } else if (password.value.search(/[a-z]/) < 0) {
+            error.innerHTML =
+              "Password must contain at least one lowercase letter";
+          } else if (password.value.search(/[A-Z]/) < 0) {
+            error.innerHTML =
+              "Password must contain at least one uppercase letter";
+          } else if (password.value.search(/[0-9]/) < 0) {
+            error.innerHTML = "Password must contain at least one number";
+          } else {
+            form.submit();
+          }
+        } else {
+          error.innerHTML = "Password doesn't match";
+        }
+      };
+      makeErrorEmpty = () => {
+        document.getElementById("error").innerHTML = "";
+      };
+    </script>
   </body>
 </html>
