@@ -11,6 +11,12 @@ const app = express();
 // use cors
 app.use(cors());
 
+// specifying engine for ejs
+app.set("view engine", "ejs");
+
+// this line helps the server to receive data from ejs in this project password for resetting
+// the user password
+app.use(express.urlencoded({ extended: false }));
 // allows the server to use json
 app.use(express.json());
 

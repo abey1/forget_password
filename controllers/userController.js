@@ -1,5 +1,6 @@
 const UserModel = require("../models/userModels");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const createForgetPasswordToken = ({ email, _id, secret }) => {
   return jwt.sign({ email, _id }, secret, { expiresIn: "5m" });
@@ -50,7 +51,7 @@ const signupUser = async (req, res) => {
   }
 };
 
-// forgot password
+// forgot password sends email link
 const forgetPassword = async (req, res) => {
   const { email } = req.body;
   if (!email) {
@@ -74,7 +75,8 @@ const forgetPassword = async (req, res) => {
   }
 };
 
-// handle forget password
+// forget password will display passowrd and confirm password after the use clicks on the link
+// provided to his/her email
 const handleForgetPassword = async (req, res) => {
   const { id, token } = req.params;
   console.log("id=", id, " and token=", token);
@@ -84,15 +86,47 @@ const handleForgetPassword = async (req, res) => {
     if (oldUser) {
       const secret = process.env.SECRET + oldUser.password;
       const verify = jwt.verify(token, secret);
-      return res.send("Verified");
+      return res.render("index", {
+        email: verify.email,
+        status: "not verified",
+      });
     } else {
       console.log("User does not exist");
       return res.send("User does not exist");
     }
   } catch (error) {
-    res.send(
-      `${error.message} please hit forget password again and resend the link to your email`
-    );
+    res.send(error.message);
+    return console.log(error.message);
+  }
+};
+
+// forget password: this method will receive confirmed password and updates the user details
+// with the new password in the mongo database
+const resetNewPassword = async (req, res) => {
+  const { id, token } = req.params;
+  const { password } = req.body;
+  console.log(password);
+  // verify if id is in database
+  try {
+    const oldUser = await UserModel.findOne({ _id: id });
+    if (oldUser) {
+      const secret = process.env.SECRET + oldUser.password;
+      const verify = jwt.verify(token, secret);
+      // encrypt new password
+      const salt = await bcrypt.genSalt(10);
+      const newPassword = await bcrypt.hash(password, salt);
+      // update the password in the database
+      const user = await UserModel.updateOne(
+        { _id: id },
+        { $set: { password: newPassword } }
+      );
+      return res.render("index", { email: verify.email, status: "verified" });
+    } else {
+      console.log("User does not exist");
+      return res.send("User does not exist");
+    }
+  } catch (error) {
+    res.send(error.message);
     return console.log(error.message);
   }
 };
@@ -103,4 +137,5 @@ module.exports = {
   verifyToken,
   forgetPassword,
   handleForgetPassword,
+  resetNewPassword,
 };
