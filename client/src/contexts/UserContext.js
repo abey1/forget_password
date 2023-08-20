@@ -1,6 +1,6 @@
 import React, { useReducer, createContext } from "react";
 import { useContext } from "react";
-import { SIGNUP, LOGIN } from "../utilities/constants";
+import { SIGNUP, LOGIN, LOGOUT } from "../utilities/constants";
 
 export const UserContext = createContext();
 
@@ -15,6 +15,10 @@ const reducer = (state, action) => {
     }
     case LOGIN: {
       return { ...state, email: action.payload };
+    }
+    case LOGOUT: {
+      localStorage.removeItem("token");
+      return { ...state, email: "" };
     }
     default: {
       return state;

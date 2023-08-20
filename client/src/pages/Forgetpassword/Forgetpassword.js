@@ -3,29 +3,35 @@ import "./Forgetpassword.scss";
 import loginImage from "../../assets/login_image.png";
 import { Formik } from "formik";
 import { Link } from "react-router-dom";
+import { server_url } from "../../utilities/constants";
 const Forgetpassword = () => {
   return (
     <div className="forgetpassword_page">
       <div className="forgetpassword_left_right">
         <div>
           <Formik
-            initialValues={{ email: "", password: "" }}
-            validate={(values) => {
-              const errors = {};
-              if (!values.email) {
-                errors.email = "Required";
-              } else if (
-                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-              ) {
-                errors.email = "Invalid email address";
-              }
-              return errors;
-            }}
-            onSubmit={(values, { setSubmitting }) => {
-              setTimeout(() => {
-                alert(JSON.stringify(values, null, 2));
-                setSubmitting(false);
-              }, 400);
+            initialValues={{ email: "", error: "" }}
+            onSubmit={async (values, { setSubmitting }) => {
+              values.error = "";
+              try {
+                const result = await fetch(
+                  `${server_url}/user/forget-password`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: values.email }),
+                  }
+                );
+                const json = await result.json();
+                if (result.ok) {
+                  values.email = "";
+                  alert(
+                    "A link to change your password has been sent to your email"
+                  );
+                } else {
+                  values.error = json.error;
+                }
+              } catch (error) {}
             }}
           >
             {({
@@ -61,11 +67,14 @@ const Forgetpassword = () => {
                       placeholder="email"
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      onFocus={() => {
+                        values.error = "";
+                      }}
                       value={values.email}
                     />
                   </div>
 
-                  {errors.email && touched.email && errors.email}
+                  <div className="forget_password_error">{values.error}</div>
                   <button
                     className="send_link_btn"
                     type="submit"

@@ -3,29 +3,38 @@ import "./Login.scss";
 import loginImage from "../../assets/login_image.png";
 import { Formik } from "formik";
 import { Link } from "react-router-dom";
+import { server_url, LOGIN } from "../../utilities/constants";
+import { useUserContext } from "../../contexts/UserContext";
 const Login = () => {
+  const { userDispatch } = useUserContext();
   return (
     <div className="login_page">
       <div className="login_left_right">
         <div>
           <Formik
-            initialValues={{ email: "", password: "" }}
-            validate={(values) => {
-              const errors = {};
-              if (!values.email) {
-                errors.email = "Required";
-              } else if (
-                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-              ) {
-                errors.email = "Invalid email address";
+            initialValues={{ email: "", password: "", error: "" }}
+            onSubmit={async (values, { setSubmitting }) => {
+              values.error = "";
+              try {
+                const result = await fetch(`${server_url}/user/login`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    email: values.email,
+                    password: values.password,
+                  }),
+                });
+                const json = await result.json();
+                if (result.ok) {
+                  const { email, token } = json;
+                  userDispatch({ type: LOGIN, payload: email });
+                  localStorage.setItem("token", token);
+                } else {
+                  values.error = json.error;
+                }
+              } catch (error) {
+                values.error = error.message;
               }
-              return errors;
-            }}
-            onSubmit={(values, { setSubmitting }) => {
-              setTimeout(() => {
-                alert(JSON.stringify(values, null, 2));
-                setSubmitting(false);
-              }, 400);
             }}
           >
             {({
@@ -52,6 +61,7 @@ const Login = () => {
                       placeholder="email"
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      onFocus={() => (values.error = "")}
                       value={values.email}
                     />
                   </div>
@@ -70,6 +80,7 @@ const Login = () => {
                       placeholder="password"
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      onFocus={() => (values.error = "")}
                       value={values.password}
                     />
                   </div>
@@ -78,14 +89,22 @@ const Login = () => {
                       forgot password?
                     </Link>
                   </div>
-                  {errors.password && touched.password && errors.password}
-                  <button
-                    className="signin_btn"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    sign in
-                  </button>
+                  <div className="signin_error_holder">{values.error}</div>
+
+                  <div className="signin_btn_loader_holder">
+                    {isSubmitting ? (
+                      <div class="loader"></div>
+                    ) : (
+                      <button
+                        className="signin_btn"
+                        type="submit"
+                        disabled={isSubmitting}
+                      >
+                        sign in
+                      </button>
+                    )}
+                  </div>
+
                   <div className="signup_in_login_holder">
                     Don't have an account?{" "}
                     <span className="signup_in_login">
