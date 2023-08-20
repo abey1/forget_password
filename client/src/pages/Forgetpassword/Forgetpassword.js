@@ -12,6 +12,7 @@ const Forgetpassword = () => {
           <Formik
             initialValues={{ email: "", error: "" }}
             onSubmit={async (values, { setSubmitting }) => {
+              setSubmitting(true);
               values.error = "";
               try {
                 const result = await fetch(
@@ -23,6 +24,7 @@ const Forgetpassword = () => {
                   }
                 );
                 const json = await result.json();
+                console.log(json);
                 if (result.ok) {
                   values.email = "";
                   alert(
@@ -32,6 +34,7 @@ const Forgetpassword = () => {
                   values.error = json.error;
                 }
               } catch (error) {}
+              setSubmitting(false);
             }}
           >
             {({
@@ -75,13 +78,21 @@ const Forgetpassword = () => {
                   </div>
 
                   <div className="forget_password_error">{values.error}</div>
-                  <button
-                    className="send_link_btn"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    send
-                  </button>
+
+                  <div className="send_btn_loader_holder">
+                    {isSubmitting ? (
+                      <div class="loader"></div>
+                    ) : (
+                      <button
+                        className="send_link_btn"
+                        type="submit"
+                        disabled={isSubmitting}
+                      >
+                        send
+                      </button>
+                    )}
+                  </div>
+
                   <div className="signup_in_login_holder">
                     Already have an account?{" "}
                     <span className="signin_in_forgetpassword">
