@@ -1,6 +1,25 @@
 const UserModel = require("../models/userModels");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+
+var transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "makeslifeeasy.shop@gmail.com",
+    pass: "ybayenfhtpxmwvcw",
+  },
+});
+
+const getMailOptions = ({ to, text }) => {
+  const mailOptions = {
+    from: "abeydellelegn@gmail.com",
+    to,
+    subject: "Sending Email using Node.js",
+    text,
+  };
+  return mailOptions;
+};
 
 const createForgetPasswordToken = ({ email, _id, secret }) => {
   return jwt.sign({ email, _id }, secret, { expiresIn: "5m" });
@@ -68,8 +87,19 @@ const forgetPassword = async (req, res) => {
       _id: oldUser._id,
       secret,
     });
+    // reset password link
     const passwordRestLink = `${process.env.SERVER_URL}/api/user/reset-password/${oldUser._id}/${token}`;
-    console.log(passwordRestLink);
+    transporter.sendMail(
+      getMailOptions({ to: oldUser.email, text: passwordRestLink }),
+      function (error, info) {
+        if (error) {
+          return console.log(error);
+        } else {
+          console.log("Email sent: " + info.response);
+          res.status(200).json({ status: "Email sent" });
+        }
+      }
+    );
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -79,7 +109,7 @@ const forgetPassword = async (req, res) => {
 // provided to his/her email
 const handleForgetPassword = async (req, res) => {
   const { id, token } = req.params;
-  console.log("id=", id, " and token=", token);
+  //console.log("id=", id, " and token=", token);
   // verify if id is in database
   try {
     const oldUser = await UserModel.findOne({ _id: id });
@@ -91,12 +121,12 @@ const handleForgetPassword = async (req, res) => {
         status: "not verified",
       });
     } else {
-      console.log("User does not exist");
+      //console.log("User does not exist");
       return res.send("User does not exist");
     }
   } catch (error) {
-    res.send(error.message);
-    return console.log(error.message);
+    return res.send(error.message);
+    //return console.log(error.message);
   }
 };
 
@@ -105,7 +135,7 @@ const handleForgetPassword = async (req, res) => {
 const resetNewPassword = async (req, res) => {
   const { id, token } = req.params;
   const { password } = req.body;
-  console.log(password);
+  // console.log(password);
   // verify if id is in database
   try {
     const oldUser = await UserModel.findOne({ _id: id });
